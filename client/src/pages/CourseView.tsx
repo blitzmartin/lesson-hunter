@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { api, type Course, type SyllabusEntry } from '../api';
-import { TrashIcon } from '../components/TrashIcon';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { api, type Course, type SyllabusEntry } from "../api";
+import { TrashIcon } from "../components/TrashIcon";
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 export default function CourseView() {
@@ -14,7 +14,7 @@ export default function CourseView() {
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [activeOrder, setActiveOrder] = useState<number | null>(null);
-  const [notesDraft, setNotesDraft] = useState('');
+  const [notesDraft, setNotesDraft] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -27,30 +27,38 @@ export default function CourseView() {
 
   useEffect(() => {
     const entry = course?.syllabus.find((s) => s.order === activeOrder);
-    setNotesDraft(entry?.userNotes ?? '');
+    setNotesDraft(entry?.userNotes ?? "");
   }, [activeOrder, course]);
 
-  if (!course) return <p className="font-mono text-sm text-muted-2">Loading…</p>;
+  if (!course)
+    return <p className="font-mono text-sm text-muted-2">Loading…</p>;
 
-  const active = course.syllabus.find((s) => s.order === activeOrder) as SyllabusEntry | undefined;
+  const active = course.syllabus.find((s) => s.order === activeOrder) as
+    | SyllabusEntry
+    | undefined;
 
   const toggleCompleted = async (entry: SyllabusEntry) => {
-    const updated = await api.updateSyllabusEntry(course.id, entry.order, { completed: !entry.completed });
+    const updated = await api.updateSyllabusEntry(course.id, entry.order, {
+      completed: !entry.completed,
+    });
     setCourse(updated);
   };
 
   const saveNotes = async () => {
     if (!active) return;
-    const updated = await api.updateSyllabusEntry(course.id, active.order, { userNotes: notesDraft });
+    const updated = await api.updateSyllabusEntry(course.id, active.order, {
+      userNotes: notesDraft,
+    });
     setCourse(updated);
   };
 
   const deleteCourse = async () => {
-    if (!window.confirm(`Delete "${course.topic}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete "${course.topic}"? This cannot be undone.`))
+      return;
     setDeleting(true);
     try {
       await api.deleteCourse(course.id);
-      navigate('/');
+      navigate("/");
     } finally {
       setDeleting(false);
     }
@@ -60,7 +68,9 @@ export default function CourseView() {
     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
       <aside className="border border-line bg-paper">
         <div className="p-6 border-b border-line">
-          <span className="font-mono uppercase tracking-widest text-xs text-muted-2">{course.level}</span>
+          <span className="font-mono uppercase tracking-widest text-xs text-muted-2">
+            {course.level}
+          </span>
           <h2 className="font-display font-light uppercase tracking-tight text-xl leading-[0.95] mt-1">
             {course.topic}
           </h2>
@@ -68,19 +78,22 @@ export default function CourseView() {
             type="button"
             onClick={deleteCourse}
             disabled={deleting}
-            className="mt-4 flex items-center gap-2 font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+            className="mt-4 flex items-center gap-2 font-mono uppercase tracking-widest text-xs rounded-full border-1 border-muted text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
           >
             <TrashIcon className="w-3.5 h-3.5" />
-            {deleting ? 'Deleting…' : 'Delete course'}
+            {deleting ? "Deleting…" : "Delete course"}
           </button>
         </div>
         <ol>
           {course.syllabus.map((entry) => (
-            <li key={entry.order} className="border-b border-line last:border-b-0">
+            <li
+              key={entry.order}
+              className="border-b border-line last:border-b-0"
+            >
               <button
                 onClick={() => setActiveOrder(entry.order)}
                 className={`w-full text-left px-6 py-4 flex items-start gap-3 ${
-                  entry.order === activeOrder ? 'bg-yellow' : 'hover:bg-paper-2'
+                  entry.order === activeOrder ? "bg-yellow" : "hover:bg-paper-2"
                 }`}
               >
                 <span
@@ -89,11 +102,13 @@ export default function CourseView() {
                     toggleCompleted(entry);
                   }}
                   className={`mt-0.5 inline-block w-4 h-4 border-2 border-ink flex-shrink-0 ${
-                    entry.completed ? 'bg-ink' : 'bg-transparent'
+                    entry.completed ? "bg-ink" : "bg-transparent"
                   }`}
                 />
                 <span className="text-sm leading-snug">
-                  <span className="font-mono text-xs text-muted-2 mr-2">{entry.order}</span>
+                  <span className="font-mono text-xs text-muted-2 mr-2">
+                    {entry.order}
+                  </span>
                   {entry.subTopicTitle}
                 </span>
               </button>
@@ -105,7 +120,9 @@ export default function CourseView() {
       <section>
         {!active?.video && (
           <div className="border border-line bg-paper-2 p-16 text-center">
-            <p className="font-mono text-sm text-muted-2">No video found for this sub-topic.</p>
+            <p className="font-mono text-sm text-muted-2">
+              No video found for this sub-topic.
+            </p>
           </div>
         )}
 
@@ -127,7 +144,8 @@ export default function CourseView() {
                   {active.subTopicTitle}
                 </h3>
                 <p className="font-mono text-xs text-muted-2 mt-2">
-                  {active.video.channelName} · {formatDuration(active.video.durationSeconds)} ·{' '}
+                  {active.video.channelName} ·{" "}
+                  {formatDuration(active.video.durationSeconds)} ·{" "}
                   {active.video.viewCount.toLocaleString()} views
                 </p>
               </div>

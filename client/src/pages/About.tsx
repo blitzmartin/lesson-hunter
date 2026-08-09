@@ -6,7 +6,7 @@ export default function About() {
           About
         </p>
         <h1 className="font-display font-light uppercase tracking-tight text-4xl leading-[0.92] mt-3">
-          Tailor-made courses - AI curated, human generated.
+          Tailor-made courses: AI curated, human generated.
         </h1>
         <p className="text-muted mt-6">
           Lesson Hunter finds and sequences great existing YouTube videos into a
