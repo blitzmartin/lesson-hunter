@@ -3,3 +3,4 @@ node_modules/
 *.local.json
 .claude/
 CLAUDE.md
+client/dist/

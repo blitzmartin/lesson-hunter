@@ -5,12 +5,30 @@
   "bin": {
     "lessonhunter": "./bin/cli.js"
   },
-  "description": "",
-  "main": "index.js",
+  "description": "Local-first tool that turns any topic into a curated YouTube video course.",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:server": "node server/index.js --dev",
+    "dev:client": "npm run dev --workspace=client",
+    "dev": "concurrently -k -n server,client -c blue,yellow \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "npm run build --workspace=client",
+    "start": "node bin/cli.js",
+    "test": "node --test server/test"
   },
+  "workspaces": [
+    "client"
+  ],
   "keywords": [],
   "author": "",
-  "license": "PolyForm-Noncommercial-1.0.0"
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "dependencies": {
+    "express": "^4.19.2",
+    "get-port": "^7.1.0",
+    "open": "^10.1.0",
+    "keytar": "^7.9.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
