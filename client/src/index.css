@@ -2,22 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CODE font files are not bundled in this repo — drop CODE-Light.otf / CODE-Bold.otf
-   into client/public/fonts/ per PBL-GUIDELINES.md §3. Until then this rule is inert
-   and headings fall back to the sans stack. */
-@font-face {
-  font-family: 'CODE';
-  src: url('/fonts/CODE-Light.otf') format('opentype');
-  font-weight: 300;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'CODE';
-  src: url('/fonts/CODE-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-display: swap;
-}
-
 .bg-dotgrid {
   background-color: #f4f1ea;
   background-image: radial-gradient(circle, #d8d3c4 1.4px, transparent 1.6px);

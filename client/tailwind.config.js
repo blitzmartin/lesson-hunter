@@ -19,9 +19,9 @@ export default {
         'muted-on-ink': '#A7A399',
       },
       fontFamily: {
-        display: ['CODE', 'sans-serif'],
-        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
-        mono: ['Space Mono', 'ui-monospace', 'monospace'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },
