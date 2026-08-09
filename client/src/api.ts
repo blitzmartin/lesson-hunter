@@ -33,6 +33,7 @@ export interface Course {
   topic: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   language: string;
+  languageCode: string;
   videoCountRange: string;
   notes: string;
   createdAt: string;
@@ -74,6 +75,7 @@ export const api = {
     topic: string;
     level: string;
     language: string;
+    languageCode: string;
     videoCountRange: string;
     notes?: string;
   }) => request<Course>('/courses/generate', { method: 'POST', body: JSON.stringify(payload) }),

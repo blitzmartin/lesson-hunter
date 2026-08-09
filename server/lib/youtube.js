@@ -24,7 +24,40 @@ function parseIsoDuration(iso) {
   return (Number(h) || 0) * 3600 + (Number(m) || 0) * 60 + (Number(s) || 0);
 }
 
+// relevanceLanguage requires an ISO 639-1 code (e.g. "en") — passing YouTube
+// free text like "English" fails with "Request contains an invalid argument".
+const LANGUAGE_NAME_TO_ISO = {
+  english: 'en',
+  italian: 'it',
+  italiano: 'it',
+  spanish: 'es',
+  español: 'es',
+  french: 'fr',
+  français: 'fr',
+  german: 'de',
+  deutsch: 'de',
+  portuguese: 'pt',
+  português: 'pt',
+  dutch: 'nl',
+  russian: 'ru',
+  japanese: 'ja',
+  chinese: 'zh',
+  korean: 'ko',
+  arabic: 'ar',
+  hindi: 'hi',
+  polish: 'pl',
+  turkish: 'tr',
+};
+
+function toIsoLanguage(language) {
+  if (!language) return undefined;
+  const trimmed = language.trim();
+  if (/^[a-zA-Z]{2}$/.test(trimmed)) return trimmed.toLowerCase();
+  return LANGUAGE_NAME_TO_ISO[trimmed.toLowerCase()];
+}
+
 export async function searchAndDetail({ apiKey, query, language, maxResults = 8 }) {
+  const relevanceLanguage = toIsoLanguage(language);
   const searchJson = await get(
     'search',
     {
@@ -32,7 +65,7 @@ export async function searchAndDetail({ apiKey, query, language, maxResults = 8 
       type: 'video',
       maxResults,
       q: query,
-      relevanceLanguage: language,
+      ...(relevanceLanguage ? { relevanceLanguage } : {}),
       safeSearch: 'moderate',
     },
     apiKey

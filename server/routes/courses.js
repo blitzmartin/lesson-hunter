@@ -53,9 +53,11 @@ coursesRouter.patch('/:id/syllabus/:order', async (req, res) => {
 });
 
 coursesRouter.post('/generate', async (req, res) => {
-  const { topic, level, language, videoCountRange, notes } = req.body || {};
-  if (!topic || !level || !language || !videoCountRange) {
-    return res.status(400).json({ error: 'topic, level, language and videoCountRange are required' });
+  const { topic, level, language, languageCode, videoCountRange, notes } = req.body || {};
+  if (!topic || !level || !language || !languageCode || !videoCountRange) {
+    return res
+      .status(400)
+      .json({ error: 'topic, level, language, languageCode and videoCountRange are required' });
   }
 
   try {
@@ -70,6 +72,7 @@ coursesRouter.post('/generate', async (req, res) => {
       topic,
       level,
       language,
+      languageCode,
       videoCountRange,
       notes,
     });

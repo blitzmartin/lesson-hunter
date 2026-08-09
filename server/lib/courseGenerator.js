@@ -9,6 +9,7 @@ export async function generateCourse({
   topic,
   level,
   language,
+  languageCode,
   videoCountRange,
   notes,
   onProgress = () => {},
@@ -36,7 +37,7 @@ export async function generateCourse({
     const candidates = await searchAndDetail({
       apiKey: youtubeApiKey,
       query: sub.searchQuery,
-      language,
+      language: languageCode,
     });
 
     if (candidates.length === 0) {
@@ -75,6 +76,7 @@ export async function generateCourse({
     topic,
     level,
     language,
+    languageCode,
     videoCountRange,
     notes: notes || '',
     createdAt: new Date().toISOString(),
