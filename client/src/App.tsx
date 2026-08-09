@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import NewCourse from './pages/NewCourse';
 import CourseView from './pages/CourseView';
 import Setup from './pages/Setup';
+import About from './pages/About';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/new" element={<NewCourse />} />
         <Route path="/courses/:id" element={<CourseView />} />
         <Route path="/setup" element={<Setup />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Layout>
   );

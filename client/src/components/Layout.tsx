@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Footer } from "./Footer";
 
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-dotgrid">
+    <div className="min-h-screen bg-dotgrid flex flex-col">
       <header className="border-b border-line">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-8 py-6">
           <Link to="/">LESSON HUNTER</Link>
@@ -18,6 +19,14 @@ export function Layout({ children }: { children: ReactNode }) {
               }`}
             >
               Courses
+            </Link>
+            <Link
+              to="/about"
+              className={`font-mono uppercase tracking-widest text-xs ${
+                isActive("/about") ? "text-ink" : "text-muted-2"
+              }`}
+            >
+              About
             </Link>
             <Link
               to="/new"
@@ -36,7 +45,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-8 py-12">{children}</main>
+      <main className="max-w-6xl mx-auto px-8 py-12 flex-1 w-full">{children}</main>
+      <Footer />
     </div>
   );
 }
