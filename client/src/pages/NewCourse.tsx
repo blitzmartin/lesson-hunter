@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
-import { LANGUAGES } from "../languages";
 import { LoadingDots } from "../components/LoadingDots";
+import { LANGUAGES } from "../languages";
 
 const LEVELS = ["beginner", "intermediate", "advanced"] as const;
 const COUNT_RANGES = ["1-5", "6-15", "15-30"];
@@ -139,7 +139,9 @@ export default function NewCourse() {
             <p className="font-mono uppercase tracking-widest text-xs text-muted-2 mb-2">
               Course generation failed
             </p>
-            <p className="font-mono text-xs text-ink whitespace-pre-wrap break-words">{error}</p>
+            <p className="font-mono text-xs text-ink whitespace-pre-wrap break-words">
+              {error}
+            </p>
           </div>
         )}
 
@@ -160,7 +162,7 @@ export default function NewCourse() {
         {loading && (
           <p className="font-mono text-xs text-muted-2">
             This researches the topic, builds a syllabus, and searches YouTube
-            for each sub-topic — it can take a minute or two.
+            for each sub-topic - it can take a minute or two.
           </p>
         )}
       </form>
