@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api, type Course, type SyllabusEntry } from '../api';
 
 function formatDuration(seconds: number) {
@@ -10,9 +10,11 @@ function formatDuration(seconds: number) {
 
 export default function CourseView() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [activeOrder, setActiveOrder] = useState<number | null>(null);
   const [notesDraft, setNotesDraft] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -42,6 +44,17 @@ export default function CourseView() {
     setCourse(updated);
   };
 
+  const deleteCourse = async () => {
+    if (!window.confirm(`Delete "${course.topic}"? This cannot be undone.`)) return;
+    setDeleting(true);
+    try {
+      await api.deleteCourse(course.id);
+      navigate('/');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
       <aside className="border border-line bg-paper">
@@ -50,6 +63,14 @@ export default function CourseView() {
           <h2 className="font-display font-light uppercase tracking-tight text-xl leading-[0.95] mt-1">
             {course.topic}
           </h2>
+          <button
+            type="button"
+            onClick={deleteCourse}
+            disabled={deleting}
+            className="mt-4 font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+          >
+            {deleting ? 'Deleting…' : 'Delete course'}
+          </button>
         </div>
         <ol>
           {course.syllabus.map((entry) => (
