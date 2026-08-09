@@ -301,8 +301,8 @@ export default function Setup() {
           </span>
         </div>
         <p className="text-muted mt-4">
-          Search calls cost 100 quota units against a 10,000/day default budget — generating many or large
-          courses in one day can hit that limit. That's expected, not a bug.{' '}
+          Each sub-topic runs two search calls (200 quota units total) against a 10,000/day default budget —
+          generating many or large courses in one day can hit that limit. That's expected, not a bug.{' '}
           <a
             href="https://console.cloud.google.com/apis/credentials"
             target="_blank"

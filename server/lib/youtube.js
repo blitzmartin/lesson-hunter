@@ -1,6 +1,8 @@
 // Thin client for the YouTube Data API v3. search.list costs 100 quota units
-// per call against a 10,000/day default budget — see CLAUDE.md §4. Callers
-// should keep search calls to one per sub-topic.
+// per call against a 10,000/day default budget — see CLAUDE.md §4.
+// searchAndDetail issues two search.list calls per sub-topic (relevance +
+// viewCount, merged) to widen the candidate pool, so budget 200 units per
+// sub-topic when estimating how many courses fit in a day's quota.
 
 const BASE = 'https://www.googleapis.com/youtube/v3';
 
@@ -56,8 +58,13 @@ function toIsoLanguage(language) {
   return LANGUAGE_NAME_TO_ISO[trimmed.toLowerCase()];
 }
 
-export async function searchAndDetail({ apiKey, query, language, maxResults = 8 }) {
-  const relevanceLanguage = toIsoLanguage(language);
+// Two search passes over the same query, merged: "relevance" (YouTube's
+// default, weighs text match) alone can miss well-known, heavily-watched
+// tutorials whose title doesn't match closely. Adding a "viewCount" pass
+// widens the candidate pool with popular results — order still filters by
+// the query, it only re-ranks matches, so this doesn't pull in unrelated
+// viral videos. Doubles search.list quota cost per sub-topic (see header).
+async function searchOnce({ apiKey, query, relevanceLanguage, order, maxResults }) {
   const searchJson = await get(
     'search',
     {
@@ -65,13 +72,23 @@ export async function searchAndDetail({ apiKey, query, language, maxResults = 8 
       type: 'video',
       maxResults,
       q: query,
+      order,
       ...(relevanceLanguage ? { relevanceLanguage } : {}),
       safeSearch: 'moderate',
     },
     apiKey
   );
+  return (searchJson.items || []).map((i) => i.id.videoId).filter(Boolean);
+}
 
-  const ids = (searchJson.items || []).map((i) => i.id.videoId).filter(Boolean);
+export async function searchAndDetail({ apiKey, query, language, maxResults = 8 }) {
+  const relevanceLanguage = toIsoLanguage(language);
+  const [relevanceIds, popularIds] = await Promise.all([
+    searchOnce({ apiKey, query, relevanceLanguage, order: 'relevance', maxResults }),
+    searchOnce({ apiKey, query, relevanceLanguage, order: 'viewCount', maxResults }),
+  ]);
+
+  const ids = [...new Set([...relevanceIds, ...popularIds])];
   if (ids.length === 0) return [];
 
   const detailsJson = await get(
