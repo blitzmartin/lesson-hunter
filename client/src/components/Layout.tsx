@@ -10,18 +10,13 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-dotgrid flex flex-col">
       <header className="border-b border-line">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-8 py-6">
-          <Link to="/" className="font-logo font-semibold uppercase tracking-tight text-lg text-ink">
+          <Link
+            to="/"
+            className="font-logo font-semibold uppercase tracking-tight text-lg text-ink"
+          >
             Lesson Hunter
           </Link>
           <nav className="flex items-center gap-6">
-            <Link
-              to="/"
-              className={`font-mono uppercase tracking-widest text-xs ${
-                isActive("/") ? "text-ink" : "text-muted-2"
-              }`}
-            >
-              Courses
-            </Link>
             <Link
               to="/about"
               className={`font-mono uppercase tracking-widest text-xs ${
@@ -29,6 +24,14 @@ export function Layout({ children }: { children: ReactNode }) {
               }`}
             >
               About
+            </Link>
+            <Link
+              to="/"
+              className={`font-mono uppercase tracking-widest text-xs ${
+                isActive("/") ? "text-ink" : "text-muted-2"
+              }`}
+            >
+              Courses
             </Link>
             <Link
               to="/new"
@@ -47,7 +50,9 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-8 py-12 flex-1 w-full">{children}</main>
+      <main className="max-w-6xl mx-auto px-8 py-12 flex-1 w-full">
+        {children}
+      </main>
       <Footer />
     </div>
   );
