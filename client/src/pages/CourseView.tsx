@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, type Course, type SyllabusEntry } from '../api';
+import { TrashIcon } from '../components/TrashIcon';
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -67,8 +68,9 @@ export default function CourseView() {
             type="button"
             onClick={deleteCourse}
             disabled={deleting}
-            className="mt-4 font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+            className="mt-4 flex items-center gap-2 font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
           >
+            <TrashIcon className="w-3.5 h-3.5" />
             {deleting ? 'Deleting…' : 'Delete course'}
           </button>
         </div>

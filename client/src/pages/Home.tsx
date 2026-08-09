@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type Course } from '../api';
+import { TrashIcon } from '../components/TrashIcon';
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -49,15 +50,15 @@ export default function Home() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((c) => (
-          <Link key={c.id} to={`/courses/${c.id}`} className="bg-paper border border-line p-8 block relative group">
+          <Link key={c.id} to={`/courses/${c.id}`} className="bg-paper border border-line p-8 block relative">
             <button
               type="button"
               onClick={(e) => deleteCourse(e, c)}
               disabled={deletingId === c.id}
               title="Delete course"
-              className="absolute top-4 right-4 font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink text-ink w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+              className="absolute top-4 right-4 rounded-full border-2 border-ink text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
             >
-              ×
+              <TrashIcon />
             </button>
             <span className="font-mono uppercase tracking-widest text-xs text-muted-2">{c.level}</span>
             <h3 className="font-display font-light uppercase tracking-tight text-2xl leading-[0.95] mt-2 pr-8">
