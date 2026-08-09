@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api, type Course, type SyllabusEntry } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
 import { LoadingDots } from "../components/LoadingDots";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -17,6 +18,7 @@ export default function CourseView() {
   const [activeOrder, setActiveOrder] = useState<number | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -58,9 +60,8 @@ export default function CourseView() {
     setCourse(updated);
   };
 
-  const deleteCourse = async () => {
-    if (!window.confirm(`Delete "${course.topic}"? This cannot be undone.`))
-      return;
+  const confirmDeleteCourse = async () => {
+    setConfirmingDelete(false);
     setDeleting(true);
     try {
       await api.deleteCourse(course.id);
@@ -82,7 +83,7 @@ export default function CourseView() {
           </h2>
           <button
             type="button"
-            onClick={deleteCourse}
+            onClick={() => setConfirmingDelete(true)}
             disabled={deleting}
             className="mt-4 flex items-center gap-2 font-mono uppercase tracking-widest text-xs rounded-full border-1 border-muted text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
           >
@@ -187,6 +188,15 @@ export default function CourseView() {
           </>
         )}
       </section>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete course"
+        message={`Delete "${course.topic}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteCourse}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }

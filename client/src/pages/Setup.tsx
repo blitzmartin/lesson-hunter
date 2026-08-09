@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type Config, type LlmProvider } from '../api';
 import { LoadingDots } from '../components/LoadingDots';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const CLOUD_PROVIDERS: { id: LlmProvider; label: string }[] = [
   { id: 'openai', label: 'OpenAI' },
@@ -99,6 +100,7 @@ export default function Setup() {
   const [keyInputs, setKeyInputs] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const refresh = () => api.getConfig().then(setConfig);
 
@@ -157,7 +159,7 @@ export default function Setup() {
   };
 
   const resetLlmSetup = async () => {
-    if (!window.confirm('Remove the selected LLM provider and its saved API key?')) return;
+    setConfirmingReset(false);
     setResetting(true);
     try {
       await api.resetLlmSetup();
@@ -177,7 +179,7 @@ export default function Setup() {
           {config.llmProvider && (
             <button
               type="button"
-              onClick={resetLlmSetup}
+              onClick={() => setConfirmingReset(true)}
               disabled={resetting}
               className="font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
             >
@@ -359,6 +361,15 @@ export default function Setup() {
           leaving the in-app experience.
         </p>
       </div>
+
+      <ConfirmDialog
+        open={confirmingReset}
+        title="Reset LLM setup"
+        message="Remove the selected LLM provider and its saved API key? This cannot be undone."
+        confirmLabel="Reset"
+        onConfirm={resetLlmSetup}
+        onCancel={() => setConfirmingReset(false)}
+      />
     </div>
   );
 }

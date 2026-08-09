@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api, type Course } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
 import { LoadingDots } from "../components/LoadingDots";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 
 function courseProgress(course: Course) {
   const total = course.syllabus.length;
@@ -14,6 +15,7 @@ export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
 
   useEffect(() => {
     api.listCourses().then(setCourses);
@@ -34,11 +36,16 @@ export default function Home() {
       </p>
     );
 
-  const deleteCourse = async (e: React.MouseEvent, course: Course) => {
+  const requestDelete = (e: React.MouseEvent, course: Course) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!window.confirm(`Delete "${course.topic}"? This cannot be undone.`))
-      return;
+    setCourseToDelete(course);
+  };
+
+  const confirmDelete = async () => {
+    if (!courseToDelete) return;
+    const course = courseToDelete;
+    setCourseToDelete(null);
     setDeletingId(course.id);
     try {
       await api.deleteCourse(course.id);
@@ -98,7 +105,7 @@ export default function Home() {
             >
               <button
                 type="button"
-                onClick={(e) => deleteCourse(e, c)}
+                onClick={(e) => requestDelete(e, c)}
                 disabled={deletingId === c.id}
                 title="Delete course"
                 className="absolute top-4 right-4 rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
@@ -128,6 +135,15 @@ export default function Home() {
           );
         })}
       </div>
+
+      <ConfirmDialog
+        open={courseToDelete !== null}
+        title="Delete course"
+        message={courseToDelete ? `Delete "${courseToDelete.topic}"? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setCourseToDelete(null)}
+      />
     </div>
   );
 }
