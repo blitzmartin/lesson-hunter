@@ -10,7 +10,9 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-dotgrid flex flex-col">
       <header className="border-b border-line">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-8 py-6">
-          <Link to="/">LESSON HUNTER</Link>
+          <Link to="/" className="font-logo font-semibold uppercase tracking-tight text-lg text-ink">
+            Lesson Hunter
+          </Link>
           <nav className="flex items-center gap-6">
             <Link
               to="/"

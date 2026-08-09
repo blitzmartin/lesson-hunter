@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { LANGUAGES } from "../languages";
+import { LoadingDots } from "../components/LoadingDots";
 
 const LEVELS = ["beginner", "intermediate", "advanced"] as const;
 const COUNT_RANGES = ["1-5", "6-15", "15-30"];
@@ -138,9 +139,16 @@ export default function NewCourse() {
         <button
           type="submit"
           disabled={loading}
-          className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-7 py-3.5 hover:opacity-80 transition-opacity disabled:opacity-40"
+          className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-7 py-3.5 hover:opacity-80 transition-opacity disabled:opacity-40 inline-flex items-center gap-2"
         >
-          {loading ? "Researching & curating…" : "Generate course"}
+          {loading ? (
+            <>
+              Researching & curating
+              <LoadingDots />
+            </>
+          ) : (
+            "Generate course"
+          )}
         </button>
         {loading && (
           <p className="font-mono text-xs text-muted-2">

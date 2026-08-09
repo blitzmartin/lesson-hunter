@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, type Config, type LlmProvider } from '../api';
+import { LoadingDots } from '../components/LoadingDots';
 
 const CLOUD_PROVIDERS: { id: LlmProvider; label: string }[] = [
   { id: 'openai', label: 'OpenAI' },
@@ -114,7 +115,13 @@ export default function Setup() {
     }
   }, [config?.llmProvider, config?.ollamaEndpoint]);
 
-  if (!config) return <p className="font-mono text-sm text-muted-2">Loading…</p>;
+  if (!config)
+    return (
+      <p className="font-mono text-sm text-muted-2 inline-flex items-center gap-2">
+        Loading
+        <LoadingDots />
+      </p>
+    );
 
   const selectProvider = async (provider: LlmProvider) => {
     await api.updateConfig({ llmProvider: provider });

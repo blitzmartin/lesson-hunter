@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, type Course, type SyllabusEntry } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
+import { LoadingDots } from "../components/LoadingDots";
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -31,7 +32,12 @@ export default function CourseView() {
   }, [activeOrder, course]);
 
   if (!course)
-    return <p className="font-mono text-sm text-muted-2">Loading…</p>;
+    return (
+      <p className="font-mono text-sm text-muted-2 inline-flex items-center gap-2">
+        Loading
+        <LoadingDots />
+      </p>
+    );
 
   const active = course.syllabus.find((s) => s.order === activeOrder) as
     | SyllabusEntry

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
+import { LoadingDots } from "../components/LoadingDots";
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
@@ -12,7 +13,12 @@ export default function Home() {
   }, []);
 
   if (!courses)
-    return <p className="font-mono text-sm text-muted-2">Loading…</p>;
+    return (
+      <p className="font-mono text-sm text-muted-2 inline-flex items-center gap-2">
+        Loading
+        <LoadingDots />
+      </p>
+    );
 
   const deleteCourse = async (e: React.MouseEvent, course: Course) => {
     e.preventDefault();

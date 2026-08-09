@@ -22,6 +22,16 @@ export default {
         display: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['Inter', 'system-ui', 'sans-serif'],
+        logo: ['Unbounded', 'system-ui', 'sans-serif'],
+      },
+      keyframes: {
+        'loading-dot': {
+          '0%, 80%, 100%': { opacity: '0.2', transform: 'translateY(0)' },
+          '40%': { opacity: '1', transform: 'translateY(-2px)' },
+        },
+      },
+      animation: {
+        'loading-dot': 'loading-dot 1.2s ease-in-out infinite',
       },
     },
   },
