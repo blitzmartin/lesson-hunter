@@ -8,6 +8,8 @@ const CLOUD_PROVIDERS: { id: LlmProvider; label: string }[] = [
   { id: 'gemini', label: 'Gemini' },
 ];
 
+const MASKED_PLACEHOLDER = '••••••••••••••••';
+
 function detectBrowser(): 'chromium' | 'safari' | 'firefox' | 'other' {
   const ua = navigator.userAgent;
   if (ua.includes('Firefox')) return 'firefox';
@@ -35,13 +37,67 @@ function TestResult({ result }: { result: { ok: boolean; message: string } | nul
   );
 }
 
+// A password field that shows masked dots once a key is already saved, so the
+// user can tell at a glance it's configured — without the real key ever
+// coming back from the server. Clicking "Change" unlocks it for editing.
+function KeyField({
+  configured,
+  value,
+  onChange,
+  onSave,
+  saving,
+}: {
+  configured: boolean;
+  value: string | undefined;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  saving: boolean;
+}) {
+  const locked = configured && value === undefined;
+
+  return (
+    <div className="flex gap-3">
+      <input
+        type="password"
+        placeholder="Paste API key"
+        readOnly={locked}
+        className={`flex-1 border border-line bg-paper px-4 py-3 font-mono text-sm ${
+          locked ? 'text-muted-2' : ''
+        }`}
+        value={locked ? MASKED_PLACEHOLDER : value ?? ''}
+        onFocus={() => locked && onChange('')}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {locked ? (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          className="font-mono uppercase tracking-wider text-sm rounded-full border-2 border-ink text-ink px-5 py-2.5 hover:bg-ink hover:text-paper transition-colors"
+        >
+          Change
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={saving || !value}
+          className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-5 py-2.5 hover:opacity-80 transition-opacity disabled:opacity-40"
+        >
+          Save
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function Setup() {
   const [config, setConfig] = useState<Config | null>(null);
   const [browser] = useState(detectBrowser());
   const [ollamaModels, setOllamaModels] = useState<string[]>([]);
   const [testResults, setTestResults] = useState<Record<string, { ok: boolean; message: string }>>({});
-  const [keyInputs, setKeyInputs] = useState<Record<string, string>>({});
+  const [keyInputs, setKeyInputs] = useState<Record<string, string | undefined>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const refresh = () => api.getConfig().then(setConfig);
 
@@ -61,18 +117,18 @@ export default function Setup() {
   if (!config) return <p className="font-mono text-sm text-muted-2">Loading…</p>;
 
   const selectProvider = async (provider: LlmProvider) => {
-    const next = await api.updateConfig({ llmProvider: provider });
-    setConfig(next);
+    await api.updateConfig({ llmProvider: provider });
+    await refresh();
   };
 
   const saveOllamaEndpoint = async (endpoint: string) => {
-    const next = await api.updateConfig({ ollamaEndpoint: endpoint });
-    setConfig(next);
+    await api.updateConfig({ ollamaEndpoint: endpoint });
+    await refresh();
   };
 
   const saveOllamaModel = async (model: string) => {
-    const next = await api.updateConfig({ ollamaModel: model });
-    setConfig(next);
+    await api.updateConfig({ ollamaModel: model });
+    await refresh();
   };
 
   const saveKey = async (name: string) => {
@@ -81,7 +137,7 @@ export default function Setup() {
     setSaving(name);
     try {
       await api.setSecret(name, value);
-      setKeyInputs((prev) => ({ ...prev, [name]: '' }));
+      setKeyInputs((prev) => ({ ...prev, [name]: undefined }));
       await refresh();
     } finally {
       setSaving(null);
@@ -93,11 +149,34 @@ export default function Setup() {
     setTestResults((prev) => ({ ...prev, [provider]: result }));
   };
 
+  const resetLlmSetup = async () => {
+    if (!window.confirm('Remove the selected LLM provider and its saved API key?')) return;
+    setResetting(true);
+    try {
+      await api.resetLlmSetup();
+      setKeyInputs({});
+      setTestResults({});
+      await refresh();
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl space-y-16">
       <div>
-        <div className="font-mono uppercase tracking-widest text-sm text-muted-2 border-t-2 border-ink pt-6">
-          01 — LLM provider
+        <div className="font-mono uppercase tracking-widest text-sm text-muted-2 border-t-2 border-ink pt-6 flex items-center justify-between gap-4">
+          <span>01 — LLM provider</span>
+          {config.llmProvider && (
+            <button
+              type="button"
+              onClick={resetLlmSetup}
+              disabled={resetting}
+              className="font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+            >
+              Reset
+            </button>
+          )}
         </div>
         <p className="text-muted mt-4">
           Choose one provider to use across the whole app. Local models via Ollama need no API key but may be
@@ -161,24 +240,15 @@ export default function Setup() {
               <StatusDot ok={config.configured[config.llmProvider]} />
               <span className="font-mono uppercase tracking-widest text-xs text-muted-2">API key</span>
             </div>
-            <div className="flex gap-3">
-              <input
-                type="password"
-                placeholder="Paste API key"
-                className="flex-1 border border-line bg-paper px-4 py-3 font-mono text-sm"
-                value={keyInputs[config.llmProvider] ?? ''}
-                onChange={(e) =>
-                  setKeyInputs((prev) => ({ ...prev, [config.llmProvider as string]: e.target.value }))
-                }
-              />
-              <button
-                onClick={() => saveKey(config.llmProvider as string)}
-                disabled={saving === config.llmProvider}
-                className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-5 py-2.5 hover:opacity-80 transition-opacity disabled:opacity-40"
-              >
-                Save
-              </button>
-            </div>
+            <KeyField
+              configured={config.configured[config.llmProvider]}
+              value={keyInputs[config.llmProvider]}
+              onChange={(value) =>
+                setKeyInputs((prev) => ({ ...prev, [config.llmProvider as string]: value }))
+              }
+              onSave={() => saveKey(config.llmProvider as string)}
+              saving={saving === config.llmProvider}
+            />
             <button
               onClick={() => testProvider(config.llmProvider as string)}
               className="font-mono uppercase tracking-wider text-xs rounded-full border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors"
@@ -218,22 +288,13 @@ export default function Setup() {
           </a>
         </p>
         <div className="mt-6 bg-paper border border-line p-8 space-y-4">
-          <div className="flex gap-3">
-            <input
-              type="password"
-              placeholder="Paste YouTube Data API key"
-              className="flex-1 border border-line bg-paper px-4 py-3 font-mono text-sm"
-              value={keyInputs.youtube ?? ''}
-              onChange={(e) => setKeyInputs((prev) => ({ ...prev, youtube: e.target.value }))}
-            />
-            <button
-              onClick={() => saveKey('youtube')}
-              disabled={saving === 'youtube'}
-              className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-5 py-2.5 hover:opacity-80 transition-opacity disabled:opacity-40"
-            >
-              Save
-            </button>
-          </div>
+          <KeyField
+            configured={config.configured.youtube}
+            value={keyInputs.youtube}
+            onChange={(value) => setKeyInputs((prev) => ({ ...prev, youtube: value }))}
+            onSave={() => saveKey('youtube')}
+            saving={saving === 'youtube'}
+          />
           <button
             onClick={() => testProvider('youtube')}
             className="font-mono uppercase tracking-wider text-xs rounded-full border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors"

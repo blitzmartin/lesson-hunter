@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { readConfig, writeConfig } from '../lib/store.js';
-import { getSecret, setSecret, secretsAvailable } from '../lib/secrets.js';
+import { getSecret, setSecret, deleteSecret, secretsAvailable } from '../lib/secrets.js';
 import { getProvider, PROVIDERS } from '../lib/llm/providers.js';
 import { testConnection as testYoutube } from '../lib/youtube.js';
 
@@ -9,25 +9,40 @@ export const configRouter = Router();
 const CLOUD_PROVIDERS = ['openai', 'anthropic', 'deepseek', 'gemini'];
 const SECRET_KEYS = { youtube: 'youtube-api-key', openai: 'openai-api-key', anthropic: 'anthropic-api-key', deepseek: 'deepseek-api-key', gemini: 'gemini-api-key' };
 
-// GET /api/config — current settings + whether each secret is set (never returns key values)
-configRouter.get('/', async (req, res) => {
+// Shared shape for GET and PUT so the client never has to guess which fields
+// a given response includes — both always carry secretsAvailable/configured.
+async function buildConfigResponse() {
   const config = await readConfig();
   const status = {};
   for (const [name, secretKey] of Object.entries(SECRET_KEYS)) {
     status[name] = Boolean(await getSecret(secretKey));
   }
-  res.json({ ...config, secretsAvailable: secretsAvailable(), configured: status });
+  return { ...config, secretsAvailable: secretsAvailable(), configured: status };
+}
+
+// GET /api/config — current settings + whether each secret is set (never returns key values)
+configRouter.get('/', async (req, res) => {
+  res.json(await buildConfigResponse());
 });
 
 configRouter.put('/', async (req, res) => {
   const { llmProvider, ollamaEndpoint, ollamaModel, onboardingSeen } = req.body || {};
-  const next = await writeConfig({
+  await writeConfig({
     ...(llmProvider !== undefined ? { llmProvider } : {}),
     ...(ollamaEndpoint !== undefined ? { ollamaEndpoint } : {}),
     ...(ollamaModel !== undefined ? { ollamaModel } : {}),
     ...(onboardingSeen !== undefined ? { onboardingSeen } : {}),
   });
-  res.json(next);
+  res.json(await buildConfigResponse());
+});
+
+// DELETE /api/config/llm — clear the LLM provider selection and any cloud API keys for it
+configRouter.delete('/llm', async (req, res) => {
+  await writeConfig({ llmProvider: null, ollamaModel: null });
+  for (const provider of CLOUD_PROVIDERS) {
+    await deleteSecret(SECRET_KEYS[provider]);
+  }
+  res.json(await buildConfigResponse());
 });
 
 // PUT /api/config/secrets/:name  { value }

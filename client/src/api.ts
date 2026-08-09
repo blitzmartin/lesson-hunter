@@ -57,6 +57,7 @@ export const api = {
   getConfig: () => request<Config>('/config'),
   updateConfig: (partial: Partial<Config>) =>
     request<Config>('/config', { method: 'PUT', body: JSON.stringify(partial) }),
+  resetLlmSetup: () => request<Config>('/config/llm', { method: 'DELETE' }),
   setSecret: (name: string, value: string) =>
     request<{ ok: true }>(`/config/secrets/${name}`, { method: 'PUT', body: JSON.stringify({ value }) }),
   testProvider: (provider: string, model?: string) =>
