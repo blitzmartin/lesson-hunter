@@ -134,7 +134,14 @@ export default function NewCourse() {
           />
         </label>
 
-        {error && <p className="font-mono text-xs text-muted">{error}</p>}
+        {error && (
+          <div className="border border-line bg-paper-2 px-4 py-3">
+            <p className="font-mono uppercase tracking-widest text-xs text-muted-2 mb-2">
+              Course generation failed
+            </p>
+            <p className="font-mono text-xs text-ink whitespace-pre-wrap break-words">{error}</p>
+          </div>
+        )}
 
         <button
           type="submit"

@@ -204,6 +204,22 @@ export default function Setup() {
           ))}
         </div>
 
+        <div className="mt-6 border border-line bg-paper-2 px-4 py-3">
+          <p className="font-mono uppercase tracking-widest text-xs text-muted-2 mb-2">
+            A note on quality
+          </p>
+          <p className="text-muted text-sm">
+            The model you pick here drives both steps of course generation — designing the
+            syllabus and matching each sub-topic to a video — so it has a real effect on the
+            result. Larger cloud models (OpenAI, Anthropic, Gemini) are generally more reliable at
+            following instructions and producing well-formed output. Smaller local Ollama models
+            are free and fully private, but may build weaker syllabi or occasionally return
+            malformed responses that fail generation. If a course comes out shallow, oddly
+            ordered, or generation errors out, try a stronger model before assuming something's
+            broken.
+          </p>
+        </div>
+
         {config.llmProvider === 'ollama' && (
           <div className="mt-8 bg-paper border border-line p-8 space-y-4">
             <label className="block">

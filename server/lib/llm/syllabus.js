@@ -15,34 +15,82 @@ function buildPrompt({ topic, level, language, videoCountRange, notes }) {
     .join('\n');
 }
 
+// V8 truncates JSON.parse's own SyntaxError to a short snippet around the
+// failure — not enough to actually see what the model got wrong. Rethrow
+// with the parse error plus a generous, readable chunk of the actual text.
+function parseJsonOrExplain(candidate, kind) {
+  try {
+    return JSON.parse(candidate);
+  } catch (err) {
+    const preview = candidate.length > 400 ? `${candidate.slice(0, 400)}…` : candidate;
+    throw new Error(`Model returned malformed JSON for the ${kind} (${err.message}). Raw output: ${preview}`);
+  }
+}
+
 function extractJsonArray(text) {
   const start = text.indexOf('[');
   const end = text.lastIndexOf(']');
-  if (start === -1 || end === -1) throw new Error('LLM did not return a JSON array');
-  return JSON.parse(text.slice(start, end + 1));
+  if (start === -1 || end === -1) {
+    const preview = text.length > 400 ? `${text.slice(0, 400)}…` : text;
+    throw new Error(`Model did not return a JSON array. Raw output: ${preview || '(empty response)'}`);
+  }
+  return parseJsonOrExplain(text.slice(start, end + 1), 'syllabus');
 }
+
+const STRICT_JSON_REMINDER =
+  'IMPORTANT: Reply with strictly valid JSON — every string value fully wrapped in double quotes, no trailing commas, no comments, no markdown fences.';
+
+// Smaller/local models occasionally emit almost-valid JSON (a missing quote,
+// a stray comma). Retry a couple of times with a stricter reminder before
+// giving up, instead of failing the whole course generation on one hiccup.
+const MAX_ATTEMPTS = 3;
 
 export async function generateSyllabus({ providerName, providerConfig, topic, level, language, videoCountRange, notes }) {
   const provider = getProvider(providerName);
-  const prompt = buildPrompt({ topic, level, language, videoCountRange, notes });
-  const raw = await provider.complete({ ...providerConfig, system: SYSTEM_PROMPT, prompt });
-  const items = extractJsonArray(raw);
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new Error('LLM returned an empty syllabus');
+  const basePrompt = buildPrompt({ topic, level, language, videoCountRange, notes });
+
+  let lastError;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const prompt = attempt === 1 ? basePrompt : `${basePrompt}\n\n${STRICT_JSON_REMINDER}`;
+    const raw = await provider.complete({ ...providerConfig, system: SYSTEM_PROMPT, prompt });
+    try {
+      const items = extractJsonArray(raw);
+      if (!Array.isArray(items) || items.length === 0) {
+        throw new Error('LLM returned an empty syllabus');
+      }
+      return items.map((item, index) => ({
+        order: index + 1,
+        subTopicTitle: item.title,
+        searchQuery: item.searchQuery || item.title,
+        why: item.why || '',
+      }));
+    } catch (err) {
+      console.error(`[syllabus] attempt ${attempt}/${MAX_ATTEMPTS} failed. Full raw output:\n${raw}`);
+      lastError = err;
+    }
   }
-  return items.map((item, index) => ({
-    order: index + 1,
-    subTopicTitle: item.title,
-    searchQuery: item.searchQuery || item.title,
-    why: item.why || '',
-  }));
+  throw new Error(
+    `The AI model kept returning invalid JSON for the course syllabus after ${MAX_ATTEMPTS} attempts. ` +
+      `This is common with smaller local Ollama models — a cloud provider (OpenAI/Anthropic/Gemini) tends to ` +
+      `be more reliable here. Last error: ${lastError.message}`
+  );
 }
 
 const RATIONALE_SYSTEM_PROMPT = `You are helping curate a video course. Given a sub-topic and a short list of YouTube video candidates (title, channel, duration in seconds, view count), pick the single best fit. Weigh relevance to the sub-topic first, then whether the duration suits the given skill level (shorter/introductory videos for beginners, longer/deep-dive videos acceptable for advanced), then recency, with view count only as a light secondary signal — do not simply pick the most-viewed video. Reply with ONLY a JSON object: { "index": <candidate index, 0-based>, "rationale": "<one sentence explaining the pick>" }.`;
 
+function extractJsonObject(text) {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end === -1) {
+    const preview = text.length > 400 ? `${text.slice(0, 400)}…` : text;
+    throw new Error(`Model did not return a JSON object. Raw output: ${preview || '(empty response)'}`);
+  }
+  return parseJsonOrExplain(text.slice(start, end + 1), 'video pick');
+}
+
 export async function pickBestVideo({ providerName, providerConfig, subTopicTitle, level, candidates }) {
   const provider = getProvider(providerName);
-  const prompt = [
+  const basePrompt = [
     `Sub-topic: ${subTopicTitle}`,
     `Skill level: ${level}`,
     'Candidates:',
@@ -52,11 +100,19 @@ export async function pickBestVideo({ providerName, providerConfig, subTopicTitl
     ),
     'Return ONLY the JSON object.',
   ].join('\n');
-  const raw = await provider.complete({ ...providerConfig, system: RATIONALE_SYSTEM_PROMPT, prompt });
-  const start = raw.indexOf('{');
-  const end = raw.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('LLM did not return a JSON object');
-  const parsed = JSON.parse(raw.slice(start, end + 1));
-  const index = Number.isInteger(parsed.index) && candidates[parsed.index] ? parsed.index : 0;
-  return { index, rationale: parsed.rationale || 'Best available match for this sub-topic.' };
+
+  // A malformed pick here isn't worth failing the whole course over — retry
+  // once with a stricter reminder, then fall back to the first candidate.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const prompt = attempt === 1 ? basePrompt : `${basePrompt}\n\n${STRICT_JSON_REMINDER}`;
+    try {
+      const raw = await provider.complete({ ...providerConfig, system: RATIONALE_SYSTEM_PROMPT, prompt });
+      const parsed = extractJsonObject(raw);
+      const index = Number.isInteger(parsed.index) && candidates[parsed.index] ? parsed.index : 0;
+      return { index, rationale: parsed.rationale || 'Best available match for this sub-topic.' };
+    } catch (err) {
+      console.error(`[pickBestVideo] attempt ${attempt}/2 failed for "${subTopicTitle}": ${err.message}`);
+    }
+  }
+  return { index: 0, rationale: 'Best available match for this sub-topic.' };
 }
