@@ -139,6 +139,6 @@ transcript-based content verification.
 
 ## License
 
-[PolyForm Shield 1.0.0](LICENSE) — free for any use, including commercial use of the
+[PolyForm Shield 1.0.0](LICENSE) - free for any use, including commercial use of the
 tool itself (e.g. a course creator using LessonHunter professionally), except building
 a competing hosted/SaaS product from this code.
