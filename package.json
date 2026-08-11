@@ -19,8 +19,8 @@
     "client"
   ],
   "keywords": [],
-  "author": "",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "author": "Paper Board Labs",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "express": "^4.19.2",
     "get-port": "^7.1.0",
