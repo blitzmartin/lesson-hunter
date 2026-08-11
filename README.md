@@ -1,5 +1,7 @@
 # Lesson Hunter
 
+## Tailor-made courses: AI curated, human generated.
+
 A local-first tool that turns any topic into a structured video course by curating
 existing YouTube content. No video creation, just intelligent research, sequencing
 and selection. Lesson Hunter runs entirely on your own machine, in your real browser,
