@@ -175,7 +175,7 @@ export function CourseEditor({
                   onClick={() => moveRowTo(i, i - 1)}
                   disabled={i === 0}
                   title="Move up"
-                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
+                  className="sm:hidden font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
                 >
                   ↑
                 </button>
@@ -184,7 +184,7 @@ export function CourseEditor({
                   onClick={() => moveRowTo(i, i + 1)}
                   disabled={i === rows.length - 1}
                   title="Move down"
-                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
+                  className="sm:hidden font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
                 >
                   ↓
                 </button>
