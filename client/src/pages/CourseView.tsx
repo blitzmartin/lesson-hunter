@@ -151,9 +151,17 @@ export default function CourseView() {
                   {active.subTopicTitle}
                 </h3>
                 <p className="font-mono text-xs text-muted-2 mt-2">
-                  {active.video.channelName} ·{" "}
-                  {formatDuration(active.video.durationSeconds)} ·{" "}
-                  {active.video.viewCount.toLocaleString()} views
+                  {[
+                    active.video.channelName || null,
+                    active.video.durationSeconds
+                      ? formatDuration(active.video.durationSeconds)
+                      : null,
+                    active.video.viewCount
+                      ? `${active.video.viewCount.toLocaleString()} views`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
               </div>
               <a
@@ -166,12 +174,14 @@ export default function CourseView() {
               </a>
             </div>
 
-            <p className="text-muted mt-4 text-sm">
-              <span className="font-mono uppercase tracking-widest text-xs text-muted-2 mr-2">
-                Why this video
-              </span>
-              {active.video.selectionRationale}
-            </p>
+            {active.video.selectionRationale && (
+              <p className="text-muted mt-4 text-sm">
+                <span className="font-mono uppercase tracking-widest text-xs text-muted-2 mr-2">
+                  Why this video
+                </span>
+                {active.video.selectionRationale}
+              </p>
+            )}
 
             <div className="mt-10">
               <div className="font-mono uppercase tracking-widest text-xs text-muted-2 border-t-2 border-ink pt-4 mb-3">

@@ -16,7 +16,7 @@ export interface Video {
   durationSeconds: number;
   thumbnailUrl: string;
   viewCount: number;
-  publishedAt: string;
+  publishedAt: string | null;
   selectionRationale: string;
 }
 
@@ -36,6 +36,7 @@ export interface Course {
   languageCode: string;
   videoCountRange: string;
   notes: string;
+  source?: 'ai' | 'manual';
   createdAt: string;
   syllabus: SyllabusEntry[];
 }
@@ -80,4 +81,12 @@ export const api = {
     videoCountRange: string;
     notes?: string;
   }) => request<Course>('/courses/generate', { method: 'POST', body: JSON.stringify(payload) }),
+  createManualCourse: (payload: {
+    topic: string;
+    level: string;
+    language: string;
+    languageCode: string;
+    notes?: string;
+    syllabus: { subTopicTitle: string; youtubeUrl: string; videoTitle?: string; channelName?: string }[];
+  }) => request<Course>('/courses/manual', { method: 'POST', body: JSON.stringify(payload) }),
 };

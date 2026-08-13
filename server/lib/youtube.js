@@ -111,6 +111,24 @@ export async function searchAndDetail({ apiKey, query, language, maxResults = 8 
   }));
 }
 
+// Accepts watch?v=, youtu.be/, embed/, and shorts/ URL forms, or a bare 11-char ID.
+export function extractVideoId(input) {
+  const trimmed = (input || '').trim();
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname.includes('youtu.be')) return url.pathname.slice(1).split('/')[0] || null;
+    if (url.hostname.includes('youtube.com')) {
+      if (url.searchParams.get('v')) return url.searchParams.get('v');
+      const match = /\/(embed|shorts)\/([\w-]{11})/.exec(url.pathname);
+      if (match) return match[2];
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function testConnection(apiKey) {
   try {
     await get('search', { part: 'snippet', type: 'video', maxResults: 1, q: 'test' }, apiKey);

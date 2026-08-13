@@ -1,7 +1,9 @@
+import crypto from 'node:crypto';
 import { Router } from 'express';
 import { listCourses, getCourse, saveCourse, deleteCourse, readConfig } from '../lib/store.js';
 import { getSecret } from '../lib/secrets.js';
 import { generateCourse } from '../lib/courseGenerator.js';
+import { extractVideoId } from '../lib/youtube.js';
 
 export const coursesRouter = Router();
 
@@ -82,4 +84,60 @@ coursesRouter.post('/generate', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Manual course creation: no LLM, no YouTube search — the creator supplies the
+// syllabus order, sub-topic titles and YouTube links themselves.
+coursesRouter.post('/manual', async (req, res) => {
+  const { topic, level, language, languageCode, notes, syllabus } = req.body || {};
+  if (!topic || !level || !language || !languageCode) {
+    return res.status(400).json({ error: 'topic, level, language and languageCode are required' });
+  }
+  if (!Array.isArray(syllabus) || syllabus.length === 0) {
+    return res.status(400).json({ error: 'At least one sub-topic is required' });
+  }
+
+  const parsedSyllabus = [];
+  for (const [i, entry] of syllabus.entries()) {
+    const subTopicTitle = (entry?.subTopicTitle || '').trim();
+    if (!subTopicTitle) {
+      return res.status(400).json({ error: `Sub-topic ${i + 1} is missing a title` });
+    }
+    const youtubeId = extractVideoId(entry?.youtubeUrl);
+    if (!youtubeId) {
+      return res.status(400).json({ error: `Sub-topic ${i + 1}: not a valid YouTube link` });
+    }
+    parsedSyllabus.push({
+      order: i + 1,
+      subTopicTitle,
+      video: {
+        youtubeId,
+        title: (entry?.videoTitle || '').trim() || subTopicTitle,
+        channelName: (entry?.channelName || '').trim(),
+        durationSeconds: 0,
+        thumbnailUrl: `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
+        viewCount: 0,
+        publishedAt: null,
+        selectionRationale: '',
+      },
+      userNotes: '',
+      completed: false,
+    });
+  }
+
+  const course = {
+    id: crypto.randomUUID(),
+    topic,
+    level,
+    language,
+    languageCode,
+    videoCountRange: 'manual',
+    notes: notes || '',
+    source: 'manual',
+    createdAt: new Date().toISOString(),
+    syllabus: parsedSyllabus,
+  };
+
+  await saveCourse(course);
+  res.status(201).json(course);
 });

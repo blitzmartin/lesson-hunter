@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { LoadingDots } from "../components/LoadingDots";
 import { LANGUAGES } from "../languages";
@@ -41,8 +41,16 @@ export default function NewCourse() {
 
   return (
     <div className="max-w-xl">
-      <div className="font-mono uppercase tracking-widest text-sm text-muted-2 border-t-2 border-ink pt-6 mb-8">
-        New course
+      <div className="flex items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-8">
+        <div className="font-mono uppercase tracking-widest text-sm text-muted-2">
+          New course
+        </div>
+        <Link
+          to="/new/manual"
+          className="font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors whitespace-nowrap"
+        >
+          Build it myself →
+        </Link>
       </div>
 
       <form onSubmit={submit} className="space-y-8">
