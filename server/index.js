@@ -44,7 +44,7 @@ export async function startServer({ openBrowser = false } = {}) {
       if (openBrowser) {
         const { default: open } = await import('open');
         open(url).catch(() => {
-          console.log('Could not auto-open your browser — open the URL above manually.');
+          console.log('Could not auto-open your browser - open the URL above manually.');
         });
       }
       resolve({ server, port, url });
