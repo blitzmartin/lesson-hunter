@@ -69,7 +69,7 @@ default browser to it. If your browser doesn't open automatically, the terminal 
 the URL to open manually, e.g.:
 
 ```
-LessonHunter running at http://localhost:4173
+Lesson Hunter running at http://localhost:4173
 ```
 
 ### Developing
