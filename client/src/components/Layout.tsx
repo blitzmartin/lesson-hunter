@@ -12,9 +12,14 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:px-8 py-4 sm:py-6">
           <Link
             to="/"
-            className="font-logo font-semibold uppercase tracking-tight text-base sm:text-lg text-ink"
+            className="flex items-center gap-2 font-logo font-semibold uppercase tracking-tight text-base sm:text-lg text-ink"
           >
-            Lesson Hunter
+            <img
+              src="/lesson-hunter-logo.webp"
+              alt="Lesson Hunter"
+              className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+            />
+            <span className="hidden sm:inline">Lesson Hunter</span>
           </Link>
           <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6">
             <Link
