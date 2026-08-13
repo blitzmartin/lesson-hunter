@@ -1,6 +1,6 @@
 # Lesson Hunter
 
-## Tailor-made courses: AI curated, human generated.
+## Tailor-made courses: AI curated, human generated
 
 A local-first tool that turns any topic into a structured video course by curating
 existing YouTube content. No video creation, just intelligent research, sequencing
@@ -27,7 +27,7 @@ work reliably.
 
 - **Node.js 18+** and npm
 - A **YouTube Data API v3** key (free, from your own Google Cloud project)
-- An LLM provider — either:
+- An LLM provider - either:
   - a local **Ollama** install (no API key needed), or
   - an API key for **OpenAI**, **Anthropic**, **DeepSeek**, or **Gemini**
 
@@ -48,7 +48,7 @@ Register the global `lessonhunter` command:
 npm link
 ```
 
-Build the frontend (required before running `lessonhunter` in production mode — see
+Build the frontend (required before running `lessonhunter` in production mode - see
 [Running](#running) below):
 
 ```bash
@@ -64,7 +64,7 @@ lessonhunter
 ```
 
 This starts the local Express server, picks a free port automatically (starting from
-`4173`, falling back to another free port if that's taken), and opens your system's
+`4173`, falling back to another free port if that's taken) and opens your system's
 default browser to it. If your browser doesn't open automatically, the terminal prints
 the URL to open manually, e.g.:
 
@@ -89,15 +89,15 @@ On first launch, go to **Setup** (gear icon) to configure:
    `http://localhost:11434`) and pick an installed model, or enter an API key for
    OpenAI, Anthropic, DeepSeek, or Gemini. Use **Test connection** to confirm it works
    before saving. Local Ollama models are usable but weaker at video-matching
-   reasoning than cloud providers — the Setup screen shows a quality disclaimer.
-2. **YouTube Data API key** — required for searching and selecting videos. Get your
+   reasoning than cloud providers- The Setup screen shows a quality disclaimer.
+2. **YouTube Data API key** - required for searching and selecting videos. Get your
    own free key from the
    [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (enable
    the "YouTube Data API v3"). Search operations are quota-expensive (currently ~200
    units per sub-topic against a 10,000/day default quota), so generating many or
-   large courses in a single day may hit your daily limit — this is expected, not a
+   large courses in a single day may hit your daily limit. This is expected, not a
    bug, given the local single-user design.
-3. **Browser cookie notice** — LessonHunter detects your browser and shows guidance on
+3. **Browser cookie notice** - LessonHunter detects your browser and shows guidance on
    whether ad-free embedded playback will work for YouTube Premium subscribers:
    - **Chrome/Chromium**: works if third-party cookies are allowed for `youtube.com`.
    - **Safari/Firefox**: blocked by default tracking protection — embedded videos will
@@ -107,16 +107,16 @@ On first launch, go to **Setup** (gear icon) to configure:
      playback for Premium subscribers.
 
 Both your LLM API key and your YouTube API key are stored in your OS's secure
-credential store (via `keytar`) — never written to disk in plain text.
+credential store (via `keytar`) - never written to disk in plain text.
 
 ## Using LessonHunter
 
 1. **New course**: enter a topic, pick a skill level (beginner/intermediate/advanced),
-   a language, a video count range (1–5 / 6–15 / 15–30), and optional notes (e.g.
+   a language, a video count range (1–5 / 6–15 / 15–30) and optional notes (e.g.
    "focus on practical examples", "avoid framework X").
-2. The AI agent researches the topic, builds an ordered syllabus of sub-topics, and
-   picks the best-fitting YouTube video for each one — weighing relevance, appropriate
-   duration, recency, and view count, with a short rationale for why each video was
+2. The AI agent researches the topic, builds an ordered syllabus of sub-topics and
+   picks the best-fitting YouTube video for each one - weighing relevance, appropriate
+   duration, recency and view count, with a short rationale for why each video was
    chosen.
 3. **Course view**: a sidebar shows the syllabus and your progress; the main panel
    plays the selected video for the current sub-topic, with space for your own notes
@@ -134,11 +134,11 @@ YouTube Data API search are used, so this doesn't touch your daily quota.
 
 Open any course (AI-generated or manually built) and click the **pencil icon** next
 to its title to enter edit mode: rename sub-topics, reorder them, remove a video, or
-add a new one by pasting a link — the same no-search, paste-a-link flow as manual
+add a new one by pasting a link - the same no-search, paste-a-link flow as manual
 creation. The **trash icon** deletes the whole course, with a confirmation prompt
 first.
 
-Courses are saved locally as flat JSON files under `~/.lessonhunter/courses/` — nothing
+Courses are saved locally as flat JSON files under `~/.lessonhunter/courses/` - nothing
 is sent to any server beyond your chosen LLM provider and the YouTube Data API.
 
 ## Uninstalling / resetting
