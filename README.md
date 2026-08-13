@@ -122,6 +122,22 @@ credential store (via `keytar`) — never written to disk in plain text.
    plays the selected video for the current sub-topic, with space for your own notes
    per topic. Mark topics complete as you go.
 
+### Building a course yourself, without AI
+
+From the New course form, click **"Build it myself →"** to switch to a manual
+builder: enter a topic/level/language, then add one row per sub-topic with its title
+and a pasted YouTube link (a thumbnail preview confirms the link resolved correctly).
+Reorder rows with the ↑/↓ buttons before creating the course. No LLM call and no
+YouTube Data API search are used, so this doesn't touch your daily quota.
+
+### Editing a course
+
+Open any course (AI-generated or manually built) and click the **pencil icon** next
+to its title to enter edit mode: rename sub-topics, reorder them, remove a video, or
+add a new one by pasting a link — the same no-search, paste-a-link flow as manual
+creation. The **trash icon** deletes the whole course, with a confirmation prompt
+first.
+
 Courses are saved locally as flat JSON files under `~/.lessonhunter/courses/` — nothing
 is sent to any server beyond your chosen LLM provider and the YouTube Data API.
 
