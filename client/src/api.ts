@@ -89,4 +89,18 @@ export const api = {
     notes?: string;
     syllabus: { subTopicTitle: string; youtubeUrl: string; videoTitle?: string; channelName?: string }[];
   }) => request<Course>('/courses/manual', { method: 'POST', body: JSON.stringify(payload) }),
+  replaceSyllabus: (
+    courseId: string,
+    syllabus: {
+      subTopicTitle: string;
+      video: Video | null;
+      youtubeUrl?: string;
+      userNotes?: string;
+      completed?: boolean;
+    }[]
+  ) =>
+    request<Course>(`/courses/${courseId}/syllabus`, {
+      method: 'PUT',
+      body: JSON.stringify({ syllabus }),
+    }),
 };

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, type Course, type SyllabusEntry } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
+import { PencilIcon } from "../components/PencilIcon";
 import { LoadingDots } from "../components/LoadingDots";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { CourseEditor } from "../components/CourseEditor";
 
 function formatDuration(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -19,6 +21,7 @@ export default function CourseView() {
   const [notesDraft, setNotesDraft] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -71,6 +74,30 @@ export default function CourseView() {
     }
   };
 
+  if (editing) {
+    return (
+      <div>
+        <div className="mb-6">
+          <span className="font-mono uppercase tracking-widest text-xs text-muted-2">
+            {course.level}
+          </span>
+          <h2 className="font-display font-light uppercase tracking-tight text-xl leading-[0.95] mt-1">
+            {course.topic}
+          </h2>
+        </div>
+        <CourseEditor
+          course={course}
+          onCancel={() => setEditing(false)}
+          onSaved={(updated) => {
+            setCourse(updated);
+            setActiveOrder(updated.syllabus[0]?.order ?? null);
+            setEditing(false);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
       <aside className="border border-line bg-paper">
@@ -78,18 +105,34 @@ export default function CourseView() {
           <span className="font-mono uppercase tracking-widest text-xs text-muted-2">
             {course.level}
           </span>
-          <h2 className="font-display font-light uppercase tracking-tight text-xl leading-[0.95] mt-1">
-            {course.topic}
-          </h2>
-          <button
-            type="button"
-            onClick={() => setConfirmingDelete(true)}
-            disabled={deleting}
-            className="mt-4 flex items-center gap-2 font-mono uppercase tracking-widest text-xs rounded-full border-1 border-muted text-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
-          >
-            <TrashIcon className="w-3.5 h-3.5" />
-            {deleting ? "Deleting…" : "Delete course"}
-          </button>
+          <div className="flex items-start justify-between gap-3 mt-1">
+            <h2 className="font-display font-light uppercase tracking-tight text-xl leading-[0.95]">
+              {course.topic}
+            </h2>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                title="Edit course"
+                className="rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors"
+              >
+                <PencilIcon className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(true)}
+                disabled={deleting}
+                title="Delete course"
+                className="rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40"
+              >
+                {deleting ? (
+                  <LoadingDots />
+                ) : (
+                  <TrashIcon className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
         <ol>
           {course.syllabus.map((entry) => (

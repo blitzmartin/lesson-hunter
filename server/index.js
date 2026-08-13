@@ -1,11 +1,11 @@
 import express from 'express';
-import path from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { clientDist } from './lib/paths.js';
+import { resolvePort } from './lib/port.js';
 import { configRouter } from './routes/config.js';
 import { coursesRouter } from './routes/courses.js';
-import { resolvePort } from './lib/port.js';
-import { clientDist } from './lib/paths.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = process.argv.includes('--dev');
@@ -40,7 +40,7 @@ export async function startServer({ openBrowser = false } = {}) {
   return new Promise((resolve) => {
     const server = app.listen(port, async () => {
       const url = `http://localhost:${port}`;
-      console.log(`LessonHunter running at ${url}`);
+      console.log(`Lesson Hunter running at ${url}`);
       if (openBrowser) {
         const { default: open } = await import('open');
         open(url).catch(() => {
