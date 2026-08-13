@@ -129,48 +129,75 @@ export function CourseEditor({
                 setDraggedIndex(null);
                 setDragOverIndex(null);
               }}
-              className={`border p-3 flex items-center gap-3 transition-colors ${
+              className={`border p-3 flex flex-col sm:flex-row sm:items-center gap-3 transition-colors ${
                 dragOverIndex === i ? "border-ink bg-yellow" : "border-line bg-paper"
               } ${draggedIndex === i ? "opacity-40" : ""}`}
             >
-              <span
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.effectAllowed = "move";
-                  setDraggedIndex(i);
-                }}
-                onDragEnd={() => {
-                  setDraggedIndex(null);
-                  setDragOverIndex(null);
-                }}
-                title="Drag to reorder"
-                className="text-muted-2 hover:text-ink cursor-grab active:cursor-grabbing flex-shrink-0"
-              >
-                <GripIcon className="w-4 h-4" />
-              </span>
-              <div className="w-24 aspect-video border border-line bg-paper-2 flex-shrink-0 overflow-hidden">
-                {thumbId && (
-                  <img
-                    src={`https://i.ytimg.com/vi/${thumbId}/hqdefault.jpg`}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                )}
+              <div className="flex items-center gap-3">
+                <span
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = "move";
+                    setDraggedIndex(i);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedIndex(null);
+                    setDragOverIndex(null);
+                  }}
+                  title="Drag to reorder"
+                  className="hidden sm:inline-flex text-muted-2 hover:text-ink cursor-grab active:cursor-grabbing flex-shrink-0"
+                >
+                  <GripIcon className="w-4 h-4" />
+                </span>
+                <div className="w-24 aspect-video border border-line bg-paper-2 flex-shrink-0 overflow-hidden">
+                  {thumbId && (
+                    <img
+                      src={`https://i.ytimg.com/vi/${thumbId}/hqdefault.jpg`}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <input
+                  className="flex-1 border border-line bg-paper px-3 py-2 font-sans text-sm sm:hidden"
+                  value={row.subTopicTitle}
+                  onChange={(e) => updateTitle(i, e.target.value)}
+                />
               </div>
               <input
-                className="flex-1 border border-line bg-paper px-3 py-2 font-sans text-sm"
+                className="hidden sm:block flex-1 border border-line bg-paper px-3 py-2 font-sans text-sm"
                 value={row.subTopicTitle}
                 onChange={(e) => updateTitle(i, e.target.value)}
               />
-              {rows.length > 1 && (
+              <div className="flex items-center justify-end gap-3 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={() => removeRow(i)}
-                  className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink flex-shrink-0"
+                  onClick={() => moveRowTo(i, i - 1)}
+                  disabled={i === 0}
+                  title="Move up"
+                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
                 >
-                  Remove
+                  ↑
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => moveRowTo(i, i + 1)}
+                  disabled={i === rows.length - 1}
+                  title="Move down"
+                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
+                >
+                  ↓
+                </button>
+                {rows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(i)}
+                    className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
