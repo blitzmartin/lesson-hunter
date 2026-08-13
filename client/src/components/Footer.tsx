@@ -1,7 +1,7 @@
 export function Footer() {
   return (
     <footer className="border-t border-line">
-      <div className="max-w-6xl mx-auto px-8 py-8 flex flex-wrap items-center justify-center gap-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 flex flex-wrap items-center justify-center gap-4">
         <p className="font-mono uppercase tracking-widest text-xs text-muted-2">
           <a
             href="https://paperboardlabs.com"

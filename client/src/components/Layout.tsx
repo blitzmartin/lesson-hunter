@@ -9,14 +9,14 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-dotgrid flex flex-col">
       <header className="border-b border-line">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-8 py-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:px-8 py-4 sm:py-6">
           <Link
             to="/"
-            className="font-logo font-semibold uppercase tracking-tight text-lg text-ink"
+            className="font-logo font-semibold uppercase tracking-tight text-base sm:text-lg text-ink"
           >
             Lesson Hunter
           </Link>
-          <nav className="flex items-center gap-6">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6">
             <Link
               to="/about"
               className={`font-mono uppercase tracking-widest text-xs ${
@@ -35,13 +35,13 @@ export function Layout({ children }: { children: ReactNode }) {
             </Link>
             <Link
               to="/new"
-              className="font-mono uppercase tracking-wider text-sm rounded-full bg-ink text-paper px-5 py-2.5 transition-opacity hover:opacity-80"
+              className="font-mono uppercase tracking-wider text-xs sm:text-sm rounded-full bg-ink text-paper px-4 py-2 sm:px-5 sm:py-2.5 transition-opacity hover:opacity-80"
             >
               New course
             </Link>
             <Link
               to="/setup"
-              className={`font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper ${
+              className={`font-mono uppercase tracking-widest text-xs rounded-full border-2 border-ink px-3 py-1.5 sm:px-4 sm:py-2 transition-colors hover:bg-ink hover:text-paper ${
                 isActive("/setup") ? "bg-ink text-paper" : "text-ink"
               }`}
             >
@@ -50,7 +50,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-8 py-12 flex-1 w-full">
+      <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12 flex-1 w-full">
         {children}
       </main>
       <Footer />

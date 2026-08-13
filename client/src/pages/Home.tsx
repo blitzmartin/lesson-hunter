@@ -134,8 +134,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-8">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as SortOrder)}
@@ -156,7 +156,7 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="inline-flex border border-line">
+        <div className="inline-flex border border-line shrink-0">
           <button
             type="button"
             onClick={() => setViewMode("grid")}
@@ -202,12 +202,12 @@ export default function Home() {
               <Link
                 key={c.id}
                 to={`/courses/${c.id}`}
-                className="bg-paper border border-line px-6 py-4 flex items-center gap-4 relative hover:bg-ink/[0.02] transition-colors"
+                className="bg-paper border border-line px-4 sm:px-6 py-4 flex flex-wrap items-center gap-x-4 gap-y-2 relative hover:bg-ink/[0.02] transition-colors"
               >
-                <span className="font-mono uppercase tracking-widest text-xs text-muted-2 w-24 shrink-0">
+                <span className="font-mono uppercase tracking-widest text-xs text-muted-2 shrink-0">
                   {c.level}
                 </span>
-                <h3 className="font-display font-light uppercase tracking-tight text-lg leading-[0.95] flex-1 truncate">
+                <h3 className="font-display font-light uppercase tracking-tight text-lg leading-[0.95] flex-1 min-w-[9rem] sm:truncate">
                   {c.topic}
                 </h3>
                 <span className="text-muted text-sm hidden sm:inline shrink-0">
@@ -226,7 +226,7 @@ export default function Home() {
                   onClick={(e) => requestDelete(e, c)}
                   disabled={deletingId === c.id}
                   title="Delete course"
-                  className="rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40 shrink-0"
+                  className="rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40 shrink-0 ml-auto sm:ml-0"
                 >
                   <TrashIcon />
                 </button>
@@ -238,7 +238,7 @@ export default function Home() {
             <Link
               key={c.id}
               to={`/courses/${c.id}`}
-              className="bg-paper border border-line p-8 block relative"
+              className="bg-paper border border-line p-6 sm:p-8 block relative"
             >
               <button
                 type="button"
@@ -252,7 +252,7 @@ export default function Home() {
               <span className="font-mono uppercase tracking-widest text-xs text-muted-2">
                 {c.level}
               </span>
-              <h3 className="font-display font-light uppercase tracking-tight text-2xl leading-[0.95] mt-2 pr-8">
+              <h3 className="font-display font-light uppercase tracking-tight text-xl sm:text-2xl leading-[0.95] mt-2 pr-8">
                 {c.topic}
               </h3>
               <p className="text-muted mt-3 text-sm">
