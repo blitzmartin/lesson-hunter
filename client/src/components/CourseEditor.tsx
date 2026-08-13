@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, type Course, type SyllabusEntry } from "../api";
 import { GripIcon } from "./GripIcon";
 
@@ -54,7 +54,7 @@ export function CourseEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragIndexRef = useRef<number | null>(null);
 
   const updateTitle = (i: number, subTopicTitle: string) =>
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, subTopicTitle } : r)));
@@ -70,6 +70,43 @@ export function CourseEditor({
       next.splice(to, 0, moved);
       return next;
     });
+
+  // Pointer Events instead of the HTML5 Drag and Drop API: HTML5 drag
+  // (draggable + dragstart/dragover/drop) doesn't fire reliably on touch
+  // browsers, while pointer events cover mouse, touch, and pen uniformly.
+  useEffect(() => {
+    if (draggedIndex === null) return;
+
+    const handleMove = (e: PointerEvent) => {
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      const rowEl = target instanceof Element ? target.closest<HTMLElement>("[data-row-index]") : null;
+      if (!rowEl) return;
+      const overIndex = Number(rowEl.dataset.rowIndex);
+      if (Number.isNaN(overIndex) || dragIndexRef.current === null || dragIndexRef.current === overIndex) return;
+      moveRowTo(dragIndexRef.current, overIndex);
+      dragIndexRef.current = overIndex;
+      setDraggedIndex(overIndex);
+    };
+
+    const stopDragging = () => {
+      dragIndexRef.current = null;
+      setDraggedIndex(null);
+    };
+
+    document.addEventListener("pointermove", handleMove);
+    document.addEventListener("pointerup", stopDragging);
+    document.addEventListener("pointercancel", stopDragging);
+    return () => {
+      document.removeEventListener("pointermove", handleMove);
+      document.removeEventListener("pointerup", stopDragging);
+      document.removeEventListener("pointercancel", stopDragging);
+    };
+  }, [draggedIndex]);
+
+  const startDrag = (i: number) => {
+    dragIndexRef.current = i;
+    setDraggedIndex(i);
+  };
 
   const newVideoId = newUrl.trim() ? extractVideoId(newUrl) : null;
   const newUrlInvalid = newUrl.trim().length > 0 && !newVideoId;
@@ -118,86 +155,45 @@ export function CourseEditor({
           return (
             <div
               key={i}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (draggedIndex !== null && draggedIndex !== i) setDragOverIndex(i);
-              }}
-              onDragLeave={() => setDragOverIndex((prev) => (prev === i ? null : prev))}
-              onDrop={(e) => {
-                e.preventDefault();
-                if (draggedIndex !== null) moveRowTo(draggedIndex, i);
-                setDraggedIndex(null);
-                setDragOverIndex(null);
-              }}
-              className={`border p-3 flex flex-col sm:flex-row sm:items-center gap-3 transition-colors ${
-                dragOverIndex === i ? "border-ink bg-yellow" : "border-line bg-paper"
-              } ${draggedIndex === i ? "opacity-40" : ""}`}
+              data-row-index={i}
+              className={`border p-3 flex items-center gap-3 transition-colors ${
+                draggedIndex === i ? "border-ink bg-yellow opacity-90" : "border-line bg-paper"
+              }`}
             >
-              <div className="flex items-center gap-3">
-                <span
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.effectAllowed = "move";
-                    setDraggedIndex(i);
-                  }}
-                  onDragEnd={() => {
-                    setDraggedIndex(null);
-                    setDragOverIndex(null);
-                  }}
-                  title="Drag to reorder"
-                  className="hidden sm:inline-flex text-muted-2 hover:text-ink cursor-grab active:cursor-grabbing flex-shrink-0"
-                >
-                  <GripIcon className="w-4 h-4" />
-                </span>
-                <div className="w-24 aspect-video border border-line bg-paper-2 flex-shrink-0 overflow-hidden">
-                  {thumbId && (
-                    <img
-                      src={`https://i.ytimg.com/vi/${thumbId}/hqdefault.jpg`}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <input
-                  className="flex-1 border border-line bg-paper px-3 py-2 font-sans text-sm sm:hidden"
-                  value={row.subTopicTitle}
-                  onChange={(e) => updateTitle(i, e.target.value)}
-                />
+              <button
+                type="button"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  startDrag(i);
+                }}
+                title="Drag to reorder"
+                className="touch-none text-muted-2 hover:text-ink cursor-grab active:cursor-grabbing flex-shrink-0"
+              >
+                <GripIcon className="w-4 h-4" />
+              </button>
+              <div className="w-16 sm:w-24 aspect-video border border-line bg-paper-2 flex-shrink-0 overflow-hidden">
+                {thumbId && (
+                  <img
+                    src={`https://i.ytimg.com/vi/${thumbId}/hqdefault.jpg`}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               <input
-                className="hidden sm:block flex-1 border border-line bg-paper px-3 py-2 font-sans text-sm"
+                className="flex-1 min-w-0 border border-line bg-paper px-3 py-2 font-sans text-sm"
                 value={row.subTopicTitle}
                 onChange={(e) => updateTitle(i, e.target.value)}
               />
-              <div className="flex items-center justify-end gap-3 flex-shrink-0">
+              {rows.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => moveRowTo(i, i - 1)}
-                  disabled={i === 0}
-                  title="Move up"
-                  className="sm:hidden font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
+                  onClick={() => removeRow(i)}
+                  className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink flex-shrink-0"
                 >
-                  ↑
+                  Remove
                 </button>
-                <button
-                  type="button"
-                  onClick={() => moveRowTo(i, i + 1)}
-                  disabled={i === rows.length - 1}
-                  title="Move down"
-                  className="sm:hidden font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
-                >
-                  ↓
-                </button>
-                {rows.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeRow(i)}
-                    className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           );
         })}
