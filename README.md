@@ -23,6 +23,13 @@ work reliably.
 
 ---
 
+## Responsive UI
+
+LessonHunter's interface adapts down to mobile screen sizes - useful if you open the
+`localhost` URL from a phone or tablet on the same network as the machine running the
+server. Navigation, course list (grid and list view), and the syllabus editor's
+drag-to-reorder all work with touch input, not just mouse.
+
 ## Requirements
 
 - **Node.js 18+** and npm
@@ -122,6 +129,14 @@ credential store (via `keytar`) - never written to disk in plain text.
    plays the selected video for the current sub-topic, with space for your own notes
    per topic. Mark topics complete as you go.
 
+### Home page: sorting and view mode
+
+The course list can be ordered **newest first** or **oldest first**, and optionally
+pushes fully completed courses to the bottom of the list regardless of sort order.
+Switch between a **grid** view (default) and a compact **list** view using the two
+icons above the course list. All three preferences are remembered locally between
+visits.
+
 ### Building a course yourself, without AI
 
 From the New course form, click **"Build it myself →"** to switch to a manual
@@ -133,10 +148,11 @@ YouTube Data API search are used, so this doesn't touch your daily quota.
 ### Editing a course
 
 Open any course (AI-generated or manually built) and click the **pencil icon** next
-to its title to enter edit mode: rename sub-topics, reorder them, remove a video, or
-add a new one by pasting a link - the same no-search, paste-a-link flow as manual
-creation. The **trash icon** deletes the whole course, with a confirmation prompt
-first.
+to its title to enter edit mode: rename sub-topics, remove a video, or add a new one
+by pasting a link - the same no-search, paste-a-link flow as manual creation. Reorder
+sub-topics by dragging the grip handle on each row - built with Pointer Events, so it
+works the same with a mouse or a touchscreen. The **trash icon** deletes the whole
+course, with a confirmation prompt first.
 
 Courses are saved locally as flat JSON files under `~/.lessonhunter/courses/` - nothing
 is sent to any server beyond your chosen LLM provider and the YouTube Data API.
