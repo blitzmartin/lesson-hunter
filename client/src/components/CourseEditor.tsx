@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api, type Course, type SyllabusEntry } from "../api";
+import { GripIcon } from "./GripIcon";
 
 // Mirrors server/lib/youtube.js#extractVideoId — used here only to derive a
 // thumbnail preview and validate new links client-side, no API call involved.
@@ -52,6 +53,8 @@ export function CourseEditor({
   const [newUrl, setNewUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const updateTitle = (i: number, subTopicTitle: string) =>
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, subTopicTitle } : r)));
@@ -59,12 +62,12 @@ export function CourseEditor({
   const removeRow = (i: number) =>
     setRows((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
 
-  const moveRow = (i: number, dir: -1 | 1) =>
+  const moveRowTo = (from: number, to: number) =>
     setRows((prev) => {
-      const target = i + dir;
-      if (target < 0 || target >= prev.length) return prev;
+      if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
       const next = [...prev];
-      [next[i], next[target]] = [next[target], next[i]];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return next;
     });
 
@@ -113,7 +116,38 @@ export function CourseEditor({
         {rows.map((row, i) => {
           const thumbId = row.video?.youtubeId ?? (row.youtubeUrl ? extractVideoId(row.youtubeUrl) : null);
           return (
-            <div key={i} className="border border-line p-3 flex items-center gap-4">
+            <div
+              key={i}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (draggedIndex !== null && draggedIndex !== i) setDragOverIndex(i);
+              }}
+              onDragLeave={() => setDragOverIndex((prev) => (prev === i ? null : prev))}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedIndex !== null) moveRowTo(draggedIndex, i);
+                setDraggedIndex(null);
+                setDragOverIndex(null);
+              }}
+              className={`border p-3 flex items-center gap-3 transition-colors ${
+                dragOverIndex === i ? "border-ink bg-yellow" : "border-line bg-paper"
+              } ${draggedIndex === i ? "opacity-40" : ""}`}
+            >
+              <span
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = "move";
+                  setDraggedIndex(i);
+                }}
+                onDragEnd={() => {
+                  setDraggedIndex(null);
+                  setDragOverIndex(null);
+                }}
+                title="Drag to reorder"
+                className="text-muted-2 hover:text-ink cursor-grab active:cursor-grabbing flex-shrink-0"
+              >
+                <GripIcon className="w-4 h-4" />
+              </span>
               <div className="w-24 aspect-video border border-line bg-paper-2 flex-shrink-0 overflow-hidden">
                 {thumbId && (
                   <img
@@ -128,35 +162,15 @@ export function CourseEditor({
                 value={row.subTopicTitle}
                 onChange={(e) => updateTitle(i, e.target.value)}
               />
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {rows.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => moveRow(i, -1)}
-                  disabled={i === 0}
-                  title="Move up"
-                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
+                  onClick={() => removeRow(i)}
+                  className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink flex-shrink-0"
                 >
-                  ↑
+                  Remove
                 </button>
-                <button
-                  type="button"
-                  onClick={() => moveRow(i, 1)}
-                  disabled={i === rows.length - 1}
-                  title="Move down"
-                  className="font-mono text-xs text-muted-2 hover:text-ink disabled:opacity-30"
-                >
-                  ↓
-                </button>
-                {rows.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeRow(i)}
-                    className="font-mono uppercase tracking-widest text-xs text-muted-2 hover:text-ink"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           );
         })}
