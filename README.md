@@ -92,7 +92,7 @@ npm run dev
 
 On first launch, go to **Setup** (gear icon) to configure:
 
-1. **LLM provider** — either point at a local Ollama endpoint (default
+1. **LLM provider** - either point at a local Ollama endpoint (default
    `http://localhost:11434`) and pick an installed model, or enter an API key for
    OpenAI, Anthropic, DeepSeek, or Gemini. Use **Test connection** to confirm it works
    before saving. Local Ollama models are usable but weaker at video-matching
