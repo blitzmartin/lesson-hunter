@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { Divider } from "../components/Divider";
 import { LoadingDots } from "../components/LoadingDots";
 import { LANGUAGES } from "../languages";
 
@@ -41,7 +42,7 @@ export default function NewCourse() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-8">
         <div className="font-mono uppercase tracking-widest text-sm text-muted-2">
           New course
         </div>
@@ -52,7 +53,7 @@ export default function NewCourse() {
           Build it myself →
         </Link>
       </div>
-
+      <Divider />
       <form onSubmit={submit} className="space-y-8">
         <label className="block">
           <span className="font-mono uppercase tracking-widest text-xs text-muted-2">

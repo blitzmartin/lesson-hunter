@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Course } from "../api";
-import { TrashIcon } from "../components/TrashIcon";
-import { LoadingDots } from "../components/LoadingDots";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Divider } from "../components/Divider";
 import { GridIcon } from "../components/GridIcon";
 import { ListIcon } from "../components/ListIcon";
+import { LoadingDots } from "../components/LoadingDots";
+import { TrashIcon } from "../components/TrashIcon";
 
 function courseProgress(course: Course) {
   const total = course.syllabus.length;
@@ -27,13 +28,14 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(
-    () => (localStorage.getItem("lessonhunter:sortOrder") as SortOrder) || "newest"
+    () =>
+      (localStorage.getItem("lessonhunter:sortOrder") as SortOrder) || "newest",
   );
   const [completedLast, setCompletedLast] = useState<boolean>(
-    () => localStorage.getItem("lessonhunter:completedLast") === "true"
+    () => localStorage.getItem("lessonhunter:completedLast") === "true",
   );
   const [viewMode, setViewMode] = useState<ViewMode>(
-    () => (localStorage.getItem("lessonhunter:viewMode") as ViewMode) || "grid"
+    () => (localStorage.getItem("lessonhunter:viewMode") as ViewMode) || "grid",
   );
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="font-mono uppercase tracking-widest text-sm text-muted-2">
           Your courses
         </div>
@@ -133,7 +135,7 @@ export default function Home() {
           className="w-full sm:w-64 border border-line bg-paper px-4 py-2 font-sans text-sm"
         />
       </div>
-
+      <Divider />
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 mb-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <select
@@ -163,7 +165,9 @@ export default function Home() {
             title="Grid view"
             aria-pressed={viewMode === "grid"}
             className={`w-9 h-9 flex items-center justify-center transition-colors ${
-              viewMode === "grid" ? "bg-ink text-paper" : "text-muted-2 hover:text-ink"
+              viewMode === "grid"
+                ? "bg-ink text-paper"
+                : "text-muted-2 hover:text-ink"
             }`}
           >
             <GridIcon />
@@ -174,7 +178,9 @@ export default function Home() {
             title="List view"
             aria-pressed={viewMode === "list"}
             className={`w-9 h-9 flex items-center justify-center border-l border-line transition-colors ${
-              viewMode === "list" ? "bg-ink text-paper" : "text-muted-2 hover:text-ink"
+              viewMode === "list"
+                ? "bg-ink text-paper"
+                : "text-muted-2 hover:text-ink"
             }`}
           >
             <ListIcon />
@@ -276,7 +282,11 @@ export default function Home() {
       <ConfirmDialog
         open={courseToDelete !== null}
         title="Delete course"
-        message={courseToDelete ? `Delete "${courseToDelete.topic}"? This cannot be undone.` : ''}
+        message={
+          courseToDelete
+            ? `Delete "${courseToDelete.topic}"? This cannot be undone.`
+            : ""
+        }
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onCancel={() => setCourseToDelete(null)}

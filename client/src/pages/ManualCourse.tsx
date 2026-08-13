@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { Divider } from "../components/Divider";
 import { LoadingDots } from "../components/LoadingDots";
 import { LANGUAGES } from "../languages";
 
@@ -22,7 +23,8 @@ function extractVideoId(input: string): string | null {
   if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
   try {
     const url = new URL(trimmed);
-    if (url.hostname.includes("youtu.be")) return url.pathname.slice(1).split("/")[0] || null;
+    if (url.hostname.includes("youtu.be"))
+      return url.pathname.slice(1).split("/")[0] || null;
     if (url.hostname.includes("youtube.com")) {
       if (url.searchParams.get("v")) return url.searchParams.get("v");
       const match = /\/(embed|shorts)\/([\w-]{11})/.exec(url.pathname);
@@ -45,12 +47,16 @@ export default function ManualCourse() {
   const [error, setError] = useState<string | null>(null);
 
   const updateRow = (i: number, patch: Partial<Row>) => {
-    setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+    setRows((prev) =>
+      prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)),
+    );
   };
 
   const addRow = () => setRows((prev) => [...prev, emptyRow()]);
   const removeRow = (i: number) =>
-    setRows((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
+    setRows((prev) =>
+      prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev,
+    );
   const moveRow = (i: number, dir: -1 | 1) =>
     setRows((prev) => {
       const target = i + dir;
@@ -87,7 +93,7 @@ export default function ManualCourse() {
 
   return (
     <div className="max-w-xl">
-      <div className="flex items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-8">
+      <div className="flex items-center justify-between gap-4 mb-8">
         <div className="font-mono uppercase tracking-widest text-sm text-muted-2">
           Manual course
         </div>
@@ -98,7 +104,7 @@ export default function ManualCourse() {
           ← Use AI instead
         </Link>
       </div>
-
+      <Divider />
       <form onSubmit={submit} className="space-y-8">
         <label className="block">
           <span className="font-mono uppercase tracking-widest text-xs text-muted-2">
@@ -159,7 +165,9 @@ export default function ManualCourse() {
           </span>
           <div className="mt-2 space-y-4">
             {rows.map((row, i) => {
-              const videoId = row.youtubeUrl.trim() ? extractVideoId(row.youtubeUrl) : null;
+              const videoId = row.youtubeUrl.trim()
+                ? extractVideoId(row.youtubeUrl)
+                : null;
               const invalid = row.youtubeUrl.trim().length > 0 && !videoId;
               return (
                 <div key={i} className="border border-line bg-paper p-4">
@@ -214,7 +222,9 @@ export default function ManualCourse() {
                         className="w-full border border-line bg-paper px-4 py-2.5 font-sans text-sm"
                         placeholder="Sub-topic title"
                         value={row.subTopicTitle}
-                        onChange={(e) => updateRow(i, { subTopicTitle: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(i, { subTopicTitle: e.target.value })
+                        }
                       />
                       <input
                         required
@@ -223,7 +233,9 @@ export default function ManualCourse() {
                         }`}
                         placeholder="Paste YouTube link"
                         value={row.youtubeUrl}
-                        onChange={(e) => updateRow(i, { youtubeUrl: e.target.value })}
+                        onChange={(e) =>
+                          updateRow(i, { youtubeUrl: e.target.value })
+                        }
                       />
                       {invalid && (
                         <p className="font-mono text-xs text-red-500">
