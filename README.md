@@ -107,7 +107,7 @@ On first launch, go to **Setup** (gear icon) to configure:
 3. **Browser cookie notice** - LessonHunter detects your browser and shows guidance on
    whether ad-free embedded playback will work for YouTube Premium subscribers:
    - **Chrome/Chromium**: works if third-party cookies are allowed for `youtube.com`.
-   - **Safari/Firefox**: blocked by default tracking protection — embedded videos will
+   - **Safari/Firefox**: blocked by default tracking protection - embedded videos will
      show standard ads.
    - Regardless of browser, every video has an **"Open on YouTube"** button that opens
      the real `youtube.com` page in a new tab, which always guarantees ad-free
