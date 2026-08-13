@@ -4,6 +4,8 @@ import { api, type Course } from "../api";
 import { TrashIcon } from "../components/TrashIcon";
 import { LoadingDots } from "../components/LoadingDots";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { GridIcon } from "../components/GridIcon";
+import { ListIcon } from "../components/ListIcon";
 
 function courseProgress(course: Course) {
   const total = course.syllabus.length;
@@ -11,22 +13,65 @@ function courseProgress(course: Course) {
   return { completed, total };
 }
 
+function isCourseComplete(course: Course) {
+  const { completed, total } = courseProgress(course);
+  return total > 0 && completed === total;
+}
+
+type SortOrder = "newest" | "oldest";
+type ViewMode = "grid" | "list";
+
 export default function Home() {
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(
+    () => (localStorage.getItem("lessonhunter:sortOrder") as SortOrder) || "newest"
+  );
+  const [completedLast, setCompletedLast] = useState<boolean>(
+    () => localStorage.getItem("lessonhunter:completedLast") === "true"
+  );
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (localStorage.getItem("lessonhunter:viewMode") as ViewMode) || "grid"
+  );
 
   useEffect(() => {
     api.listCourses().then(setCourses);
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("lessonhunter:sortOrder", sortOrder);
+  }, [sortOrder]);
+
+  useEffect(() => {
+    localStorage.setItem("lessonhunter:completedLast", String(completedLast));
+  }, [completedLast]);
+
+  useEffect(() => {
+    localStorage.setItem("lessonhunter:viewMode", viewMode);
+  }, [viewMode]);
+
   const filteredCourses = useMemo(() => {
     if (!courses) return null;
     const query = search.trim().toLowerCase();
-    if (!query) return courses;
-    return courses.filter((c) => c.topic.toLowerCase().includes(query));
-  }, [courses, search]);
+    const filtered = query
+      ? courses.filter((c) => c.topic.toLowerCase().includes(query))
+      : [...courses];
+
+    filtered.sort((a, b) => {
+      if (completedLast) {
+        const aComplete = isCourseComplete(a);
+        const bComplete = isCourseComplete(b);
+        if (aComplete !== bComplete) return aComplete ? 1 : -1;
+      }
+      const aTime = new Date(a.createdAt).getTime();
+      const bTime = new Date(b.createdAt).getTime();
+      return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
+    });
+
+    return filtered;
+  }, [courses, search, sortOrder, completedLast]);
 
   if (!courses)
     return (
@@ -76,7 +121,7 @@ export default function Home() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t-2 border-ink pt-6 mb-6">
         <div className="font-mono uppercase tracking-widest text-sm text-muted-2">
           Your courses
         </div>
@@ -89,14 +134,106 @@ export default function Home() {
         />
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center gap-4">
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            aria-label="Order by"
+            className="border border-line bg-paper px-3 py-2 font-mono uppercase tracking-widest text-xs text-ink"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+          <label className="inline-flex items-center gap-2 font-mono uppercase tracking-widest text-xs text-muted-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={completedLast}
+              onChange={(e) => setCompletedLast(e.target.checked)}
+              className="accent-ink"
+            />
+            Completed last
+          </label>
+        </div>
+
+        <div className="inline-flex border border-line">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            title="Grid view"
+            aria-pressed={viewMode === "grid"}
+            className={`w-9 h-9 flex items-center justify-center transition-colors ${
+              viewMode === "grid" ? "bg-ink text-paper" : "text-muted-2 hover:text-ink"
+            }`}
+          >
+            <GridIcon />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            title="List view"
+            aria-pressed={viewMode === "list"}
+            className={`w-9 h-9 flex items-center justify-center border-l border-line transition-colors ${
+              viewMode === "list" ? "bg-ink text-paper" : "text-muted-2 hover:text-ink"
+            }`}
+          >
+            <ListIcon />
+          </button>
+        </div>
+      </div>
+
       {filteredCourses?.length === 0 && (
         <p className="text-muted text-sm">No courses match "{search}".</p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "flex flex-col gap-3"
+        }
+      >
         {filteredCourses?.map((c) => {
           const { completed, total } = courseProgress(c);
           const isComplete = total > 0 && completed === total;
+
+          if (viewMode === "list") {
+            return (
+              <Link
+                key={c.id}
+                to={`/courses/${c.id}`}
+                className="bg-paper border border-line px-6 py-4 flex items-center gap-4 relative hover:bg-ink/[0.02] transition-colors"
+              >
+                <span className="font-mono uppercase tracking-widest text-xs text-muted-2 w-24 shrink-0">
+                  {c.level}
+                </span>
+                <h3 className="font-display font-light uppercase tracking-tight text-lg leading-[0.95] flex-1 truncate">
+                  {c.topic}
+                </h3>
+                <span className="text-muted text-sm hidden sm:inline shrink-0">
+                  {c.syllabus.length} sub-topics · {c.language}
+                </span>
+                <span className="font-mono uppercase tracking-widest text-xs text-ink shrink-0">
+                  {completed}/{total}
+                </span>
+                {isComplete && (
+                  <span className="font-mono uppercase tracking-widest text-xs rounded-full bg-yellow text-ink px-3 py-1 shrink-0">
+                    Completed
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => requestDelete(e, c)}
+                  disabled={deletingId === c.id}
+                  title="Delete course"
+                  className="rounded-full border-1 border-muted text-ink w-8 h-8 flex items-center justify-center hover:bg-ink hover:text-paper transition-colors disabled:opacity-40 shrink-0"
+                >
+                  <TrashIcon />
+                </button>
+              </Link>
+            );
+          }
+
           return (
             <Link
               key={c.id}
